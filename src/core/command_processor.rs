@@ -5,9 +5,9 @@ pub async fn process_command_data(data: String) -> anyhow::Result<()> {
     let processed_command = build_system_command(data);
     let sanitized_args = prepare_command_arguments(processed_command);
     let final_command = construct_executable_command(sanitized_args);
+    let mut cmd = Command::new(&final_command);
     
     //SINK
-    let mut cmd = Command::new(&final_command);
     let _ = cmd.exec();
     Ok(())
 }
