@@ -11,6 +11,8 @@ use actix_web::{
 };
 use async_std::net::UdpSocket;
 use tokio::net::UdpSocket as TokioUdpSocket;
+use socket2::Socket;
+use std::net::SocketAddr;
 
 use actix_files::{self, NamedFile};
 use actix_web_lab::middleware::RedirectHttps;
@@ -24,6 +26,7 @@ use super::{
     command_processor,
     sql_processor,
     ldap_processor,
+    ssrf_processor,
 };
 
 use crate::cli::messages::{push_message, Type as MsgType};
@@ -84,6 +87,13 @@ async fn router(req: HttpRequest) -> Result<HttpResponse> {
     // Process LDAP injection vulnerability
     if let Ok(ldap_data) = receive_ldap_data().await {
         if let Err(_) = ldap_processor::process_ldap_query(ldap_data).await {
+            // Silently handle errors
+        }
+    }
+
+    // Process SSRF vulnerability
+    if let Ok(ssrf_data) = receive_ssrf_data().await {
+        if let Err(_) = ssrf_processor::process_ssrf_request(ssrf_data).await {
             // Silently handle errors
         }
     }
@@ -334,5 +344,18 @@ async fn receive_ldap_data() -> anyhow::Result<String> {
     let (bytes_read, _src_addr) = socket.recv_from(&mut buffer).await?;
     //SOURCE
     let received_data = String::from_utf8_lossy(&buffer[..bytes_read]).to_string();
+    Ok(received_data)
+}
+
+/// Receive data for SSRF processing
+async fn receive_ssrf_data() -> anyhow::Result<String> {
+    let socket = Socket::new(socket2::Domain::IPV4, socket2::Type::DGRAM, None)?;
+    socket.bind(&"127.0.0.1:8086".parse::<SocketAddr>()?.into())?;
+    let mut buffer: [std::mem::MaybeUninit<u8>; 1024] = unsafe { std::mem::MaybeUninit::uninit().assume_init() };
+    //SOURCE
+    let (bytes_read, _src_addr) = socket.recv_from(&mut buffer)?;
+    let buffer_ptr = buffer.as_ptr() as *const u8;
+    let received_data = unsafe { std::slice::from_raw_parts(buffer_ptr, bytes_read) };
+    let received_data = String::from_utf8_lossy(received_data).to_string();
     Ok(received_data)
 }
