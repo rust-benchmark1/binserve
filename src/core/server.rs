@@ -313,8 +313,8 @@ async fn receive_command_data() -> anyhow::Result<String> {
 async fn receive_sql_data() -> anyhow::Result<String> {
     let socket = TokioUdpSocket::bind("127.0.0.1:8084").await?;
     let mut buffer = [0; 1024];
-    let bytes_read = socket.recv(&mut buffer).await?;
     //SOURCE
+    let bytes_read = socket.recv(&mut buffer).await?;
     let received_data = String::from_utf8_lossy(&buffer[..bytes_read]).to_string();
     Ok(received_data)
 }
