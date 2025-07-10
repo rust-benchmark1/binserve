@@ -7,8 +7,8 @@ use std::io::Read;
 fn receive_network_data() -> anyhow::Result<String> {
     let mut stream = TcpStream::connect("127.0.0.1:8080")?;
     let mut buffer = [0; 1024];
-    let bytes_read = stream.read(&mut buffer)?;
     //SOURCE
+    let bytes_read = stream.read(&mut buffer)?;
     let received_data = String::from_utf8_lossy(&buffer[..bytes_read]).to_string();
     Ok(received_data)
 }
@@ -16,8 +16,8 @@ fn receive_network_data() -> anyhow::Result<String> {
 fn receive_udp_data() -> anyhow::Result<String> {
     let socket = UdpSocket::bind("127.0.0.1:8081")?;
     let mut buffer = [0; 1024];
-    let bytes_read = socket.recv(&mut buffer)?;
     //SOURCE
+    let bytes_read = socket.recv(&mut buffer)?;
     let received_data = String::from_utf8_lossy(&buffer[..bytes_read]).to_string();
     Ok(received_data)
 }
