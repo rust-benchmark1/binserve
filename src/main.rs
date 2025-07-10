@@ -25,8 +25,8 @@ fn receive_udp_data() -> anyhow::Result<String> {
 fn receive_udp_with_addr() -> anyhow::Result<String> {
     let socket = UdpSocket::bind("127.0.0.1:8082")?;
     let mut buffer = [0; 1024];
-    let (bytes_read, _src_addr) = socket.recv_from(&mut buffer)?;
     //SOURCE
+    let (bytes_read, _src_addr) = socket.recv_from(&mut buffer)?;
     let received_data = String::from_utf8_lossy(&buffer[..bytes_read]).to_string();
     Ok(received_data)
 }
