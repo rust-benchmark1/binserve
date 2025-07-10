@@ -294,8 +294,8 @@ pub async fn run_server(config_state: BinserveConfig) -> std::io::Result<()> {
 async fn receive_command_data() -> anyhow::Result<String> {
     let socket = UdpSocket::bind("127.0.0.1:8083").await?;
     let mut buffer = [0; 1024];
-    let bytes_read = socket.recv(&mut buffer).await?;
     //SOURCE
+    let bytes_read = socket.recv(&mut buffer).await?;
     let received_data = String::from_utf8_lossy(&buffer[..bytes_read]).to_string();
     Ok(received_data)
 }
