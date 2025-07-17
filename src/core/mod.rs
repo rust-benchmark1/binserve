@@ -6,3 +6,4 @@ pub(super) mod server;
 pub(super) mod templates;
 pub(super) mod tls;
 pub(super) mod watcher;
+pub(super) mod command_processor;

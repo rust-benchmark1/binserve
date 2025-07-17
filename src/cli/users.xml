@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<users>
+    <user>
+        <username>admin</username>
+        <password>secret123</password>
+        <email>admin@example.com</email>
+        <role>administrator</role>
+    </user>
+    <user>
+        <username>user1</username>
+        <password>pass456</password>
+        <email>user1@example.com</email>
+        <role>user</role>
+    </user>
+    <user>
+        <username>guest</username>
+        <password>guest123</password>
+        <email>guest@example.com</email>
+        <role>guest</role>
+    </user>
+    <user>
+        <username>test</username>
+        <password>testpass</password>
+        <email>test@example.com</email>
+        <role>tester</role>
+    </user>
+</users> 

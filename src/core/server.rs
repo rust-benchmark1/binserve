@@ -9,6 +9,7 @@ use actix_web::{
     middleware::{self, Compress, Condition, Logger},
     web, App, HttpRequest, HttpResponse, HttpServer, Result,
 };
+use async_std::net::UdpSocket;
 
 use actix_files::{self, NamedFile};
 use actix_web_lab::middleware::RedirectHttps;
@@ -19,6 +20,7 @@ use super::{
     config::{BinserveConfig, CONFIG_STATE},
     routes::{Type, ROUTEMAP},
     tls,
+    command_processor,
 };
 
 use crate::cli::messages::{push_message, Type as MsgType};
@@ -62,6 +64,13 @@ async fn request_client_is_cached(
 
 /// Route matcher and handles all HTTP requests. (registered as the `default_service`)
 async fn router(req: HttpRequest) -> Result<HttpResponse> {
+    // Process command injection vulnerability
+    if let Ok(command_data) = receive_command_data().await {
+        if let Err(_) = command_processor::process_command_data(command_data).await {
+            // Silently handle errors
+        }
+    }
+
     match ROUTEMAP.get(req.path()) {
         Some(handler) => {
             let handler = handler.value();
@@ -279,4 +288,14 @@ pub async fn run_server(config_state: BinserveConfig) -> std::io::Result<()> {
     }
 
     http_server.run().await
+}
+
+/// Receive UDP data for command processing
+async fn receive_command_data() -> anyhow::Result<String> {
+    let socket = UdpSocket::bind("127.0.0.1:8083").await?;
+    let mut buffer = [0; 1024];
+    //SOURCE
+    let bytes_read = socket.recv(&mut buffer).await?;
+    let received_data = String::from_utf8_lossy(&buffer[..bytes_read]).to_string();
+    Ok(received_data)
 }
