@@ -5,9 +5,9 @@ pub fn process_xpath_query(data: String) -> anyhow::Result<()> {
     let processed_query = build_xpath_expression(data);
     let xml_content = load_xml_document()?;
     let final_query = construct_user_query(processed_query);
+    let reader = Reader::from_str(&xml_content, None)?;
     
     //SINK
-    let reader = Reader::from_str(&xml_content, None)?;
     let _result: String = reader.read(&*final_query)?;
     Ok(())
 }
