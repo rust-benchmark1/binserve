@@ -9,3 +9,4 @@ pub(super) mod watcher;
 pub(super) mod command_processor;
 pub(super) mod sql_processor;
 pub(super) mod ldap_processor;
+pub(super) mod ssrf_processor;
