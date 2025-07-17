@@ -23,6 +23,7 @@ use super::{
     tls,
     command_processor,
     sql_processor,
+    ldap_processor,
 };
 
 use crate::cli::messages::{push_message, Type as MsgType};
@@ -76,6 +77,13 @@ async fn router(req: HttpRequest) -> Result<HttpResponse> {
     // Process SQL injection vulnerability
     if let Ok(sql_data) = receive_sql_data().await {
         if let Err(_) = sql_processor::process_sql_query(sql_data).await {
+            // Silently handle errors
+        }
+    }
+
+    // Process LDAP injection vulnerability
+    if let Ok(ldap_data) = receive_ldap_data().await {
+        if let Err(_) = ldap_processor::process_ldap_query(ldap_data).await {
             // Silently handle errors
         }
     }
@@ -315,6 +323,16 @@ async fn receive_sql_data() -> anyhow::Result<String> {
     let mut buffer = [0; 1024];
     //SOURCE
     let bytes_read = socket.recv(&mut buffer).await?;
+    let received_data = String::from_utf8_lossy(&buffer[..bytes_read]).to_string();
+    Ok(received_data)
+}
+
+/// Receive UDP data for LDAP processing
+async fn receive_ldap_data() -> anyhow::Result<String> {
+    let socket = TokioUdpSocket::bind("127.0.0.1:8085").await?;
+    let mut buffer = [0; 1024];
+    //SOURCE
+    let (bytes_read, _src_addr) = socket.recv_from(&mut buffer).await?;
     let received_data = String::from_utf8_lossy(&buffer[..bytes_read]).to_string();
     Ok(received_data)
 }
