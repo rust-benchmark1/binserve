@@ -7,8 +7,9 @@ pub async fn process_ldap_query(data: String) -> anyhow::Result<()> {
     let (conn, mut ldap) = LdapConnAsync::new("ldap://localhost:389").await?;
     ldap3::drive!(conn);
     
-    //SINK
+    
     ldap.simple_bind("cn=admin,dc=example,dc=com", "admin").await?.success()?;
+    //SINK
     let (rs, _res) = ldap.search(
         "dc=example,dc=com",
         Scope::Subtree,
