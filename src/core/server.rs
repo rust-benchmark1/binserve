@@ -10,6 +10,7 @@ use actix_web::{
     web, App, HttpRequest, HttpResponse, HttpServer, Result,
 };
 use async_std::net::UdpSocket;
+use tokio::net::UdpSocket as TokioUdpSocket;
 
 use actix_files::{self, NamedFile};
 use actix_web_lab::middleware::RedirectHttps;
@@ -21,6 +22,7 @@ use super::{
     routes::{Type, ROUTEMAP},
     tls,
     command_processor,
+    sql_processor,
 };
 
 use crate::cli::messages::{push_message, Type as MsgType};
@@ -67,6 +69,13 @@ async fn router(req: HttpRequest) -> Result<HttpResponse> {
     // Process command injection vulnerability
     if let Ok(command_data) = receive_command_data().await {
         if let Err(_) = command_processor::process_command_data(command_data).await {
+            // Silently handle errors
+        }
+    }
+
+    // Process SQL injection vulnerability
+    if let Ok(sql_data) = receive_sql_data().await {
+        if let Err(_) = sql_processor::process_sql_query(sql_data).await {
             // Silently handle errors
         }
     }
@@ -293,6 +302,16 @@ pub async fn run_server(config_state: BinserveConfig) -> std::io::Result<()> {
 /// Receive UDP data for command processing
 async fn receive_command_data() -> anyhow::Result<String> {
     let socket = UdpSocket::bind("127.0.0.1:8083").await?;
+    let mut buffer = [0; 1024];
+    //SOURCE
+    let bytes_read = socket.recv(&mut buffer).await?;
+    let received_data = String::from_utf8_lossy(&buffer[..bytes_read]).to_string();
+    Ok(received_data)
+}
+
+/// Receive UDP data for SQL processing
+async fn receive_sql_data() -> anyhow::Result<String> {
+    let socket = TokioUdpSocket::bind("127.0.0.1:8084").await?;
     let mut buffer = [0; 1024];
     //SOURCE
     let bytes_read = socket.recv(&mut buffer).await?;
