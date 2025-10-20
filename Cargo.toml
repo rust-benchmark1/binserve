@@ -44,6 +44,8 @@ ecb = "0.1"
 cipher = "0.4"
 hex = "0.4"
 rc4 = "0.1"
+chksum-hash-md5 = "0.0.1"
+md5hash = "0.1"
 
 [profile.release]
 opt-level = 3

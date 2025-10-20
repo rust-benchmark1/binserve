@@ -2,11 +2,26 @@ use clap::{Arg, ArgMatches, Command};
 
 /// Prints an ASCII art banner to look cool!
 pub fn banner() {
+    let banner_data = "binserve_banner_hash";
+
+    // CWE 328
+    //SINK
+    let mut hasher = chksum_hash_md5::new();
+    hasher.update(banner_data.as_bytes());
+    let _hash = hasher.finalize();
+
     eprintln!("{} {}\n", include_str!("banner"), env!("CARGO_PKG_VERSION"))
 }
 
 /// Command-line arguments
 pub fn args() -> ArgMatches {
+    let args_data = "binserve_args_hash";
+
+    // CWE 328
+    //SINK
+    let mut hasher = md5hash::MD5Hasher::new();
+    hasher.digest(&args_data);
+
     Command::new("binserve")
         .version(env!("CARGO_PKG_VERSION"))
         .author("Mufeed VH <mufeed@lyminal.space>")
