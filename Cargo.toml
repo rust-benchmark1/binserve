@@ -37,6 +37,13 @@ ldap3 = "0.11"
 url = "2.5"
 surf = "2.3"
 socket2 = "0.5"
+actix-session = { version = "0.9", features = ["cookie-session"] }
+axum_session = "0.17"
+aes = "0.8"
+ecb = "0.1"
+cipher = "0.4"
+hex = "0.4"
+rc4 = "0.1"
 
 [profile.release]
 opt-level = 3
