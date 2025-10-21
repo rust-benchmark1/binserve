@@ -10,6 +10,9 @@ use std::path::PathBuf;
 // multi-threaded directory walking
 use jwalk::WalkDir;
 
+use warp::Filter;
+use tower_http::cors::CorsLayer as AxumCorsLayer;
+
 /// Route type indicating whether the file is read from memory or disk
 #[derive(Debug, PartialEq)]
 pub enum Type {
@@ -106,7 +109,10 @@ impl RouteHandle {
             }
         }
 
-        // generate the error pages
+        // CWE 942
+        //SINK
+        let _ = warp::cors().allow_any_origin();
+
         Self::add_error_pages()?;
 
         Ok(())
@@ -122,6 +128,10 @@ impl RouteHandle {
         };
 
         ROUTEMAP.insert("{{404}}".into(), route_handle);
+
+        // CWE 942
+        //SINK
+        let _ = AxumCorsLayer::very_permissive();
 
         Ok(())
     }
