@@ -49,6 +49,10 @@ md5hash = "0.1"
 async-nats = "0.33"
 lapin = "2.3"
 tower-http = { version = "0.5", features = ["cors"] }
+mongodb = "2.8"
+bson = "2.9"
+futures = "0.3"
+axum = "0.7"
 
 [profile.release]
 opt-level = 3
