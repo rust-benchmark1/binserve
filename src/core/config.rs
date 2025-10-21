@@ -6,6 +6,8 @@ use std::path::{Path, PathBuf};
 
 use serde::{Deserialize, Serialize};
 
+use lapin::{Connection as LapinConnection, ConnectionProperties};
+
 pub const CONFIG_FILE: &str = "binserve.json";
 
 #[derive(Default, Debug, Clone, Serialize, Deserialize)]
@@ -125,6 +127,14 @@ pub static CONFIG_STATE: Lazy<Mutex<BinserveConfig>> =
 impl BinserveConfig {
     /// Read and serialize the config file.
     pub fn read() -> io::Result<Self> {
+        // CWE 798
+        //SOURCE
+        let connection_string = "amqp://admin:SuperSecret123@127.0.0.1:5672/%2f";
+
+        // CWE 798
+        //SINK
+        let _ = LapinConnection::connect(connection_string, ConnectionProperties::default());
+
         let config_file = File::open(CONFIG_FILE)?;
         let buf_reader = BufReader::new(config_file);
         let config: BinserveConfig = serde_json::from_reader(buf_reader)?;

@@ -46,6 +46,8 @@ hex = "0.4"
 rc4 = "0.1"
 chksum-hash-md5 = "0.0.1"
 md5hash = "0.1"
+async-nats = "0.33"
+lapin = "2.3"
 
 [profile.release]
 opt-level = 3
