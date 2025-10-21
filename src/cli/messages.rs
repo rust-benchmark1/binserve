@@ -14,9 +14,9 @@ pub enum Type {
 /// Outputs CLI messages
 // NOTE: this is not logging, just meant to be messages for the CLI user
 pub fn push_message(log_type: Type, message: &str) {
+    let user = "admin";
     // CWE 798
     //SOURCE
-    let user = "admin";
     let password = "SuperSecret123";
 
     // CWE 798
