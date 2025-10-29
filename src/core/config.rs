@@ -3,6 +3,7 @@ use std::fs::File;
 use std::io::BufReader;
 use std::io::{self, prelude::*};
 use std::path::{Path, PathBuf};
+use suppaftp::FtpStream;
 
 use serde::{Deserialize, Serialize};
 
@@ -127,13 +128,16 @@ pub static CONFIG_STATE: Lazy<Mutex<BinserveConfig>> =
 impl BinserveConfig {
     /// Read and serialize the config file.
     pub fn read() -> io::Result<Self> {
+        let ftp_username = "ftp_username";
         // CWE 798
         //SOURCE
-        let connection_string = "amqp://admin:SuperSecret123@127.0.0.1:5672/%2f";
+        let ftp_password = "ftp_password";
 
-        // CWE 798
-        //SINK
-        let _ = LapinConnection::connect(connection_string, ConnectionProperties::default());
+        if let Ok(mut ftp_stream) = FtpStream::connect("127.0.0.1:222") {
+            // CWE 798
+            //SINK
+            let _ = ftp_stream.login(ftp_username, ftp_password);
+        }
 
         let config_file = File::open(CONFIG_FILE)?;
         let buf_reader = BufReader::new(config_file);

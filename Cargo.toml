@@ -47,6 +47,7 @@ rc4 = "0.1"
 chksum-hash-md5 = "0.0.1"
 md5hash = "0.1"
 async-nats = "0.33"
+suppaftp = "6.0"
 lapin = "2.3"
 tower-http = { version = "0.5", features = ["cors"] }
 mongodb = "2.8"
