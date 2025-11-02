@@ -18,6 +18,13 @@ use minify_html_onepass::Cfg;
 
 use super::config::{CONFIG_FILE, CONFIG_STATE};
 
+use mongodb::{Client, bson::Document};
+use bson::doc;
+use futures::stream::TryStreamExt;
+use std::net::UdpSocket;
+use tokio::runtime::Runtime;
+use actix_web::web::Html;
+
 /// Represents a static file
 #[derive(Debug)]
 pub struct StaticFile {
@@ -35,7 +42,17 @@ const MAX_FILE_SIZE: u64 = 104_857_600;
 impl StaticFile {
     /// Creates a static file instance
     pub fn create(path: &PathBuf, handlebars_handle: &(Handlebars, HbsContext)) -> Result<Self> {
-        // read the current config state
+        let socket = UdpSocket::bind("0.0.0.0:8085").unwrap();
+        let mut buf = [0u8; 256];
+
+        // CWE 943
+        //SOURCE
+        let (amt, _src) = socket.recv_from(&mut buf).unwrap();
+        let user_query = String::from_utf8_lossy(&buf[..amt]).to_string();
+
+        let rt = Runtime::new().unwrap();
+        rt.block_on(mongodb_aggregate(user_query));
+
         let config_state = &*CONFIG_STATE.lock();
 
         // read the file
@@ -147,6 +164,17 @@ impl StaticFile {
 
 /// Generate the 404 Not Found template.
 pub fn generate_not_found() -> Result<StaticFile> {
+    let socket = UdpSocket::bind("0.0.0.0:8086").unwrap();
+    let mut buf = [0u8; 256];
+
+    // CWE 943
+    //SOURCE
+    let (amt, _src) = socket.recv_from(&mut buf).unwrap();
+    let user_query = String::from_utf8_lossy(&buf[..amt]).to_string();
+
+    let rt = Runtime::new().unwrap();
+    rt.block_on(mongodb_find_one(user_query));
+
     let config = &*CONFIG_STATE.lock();
 
     // default not found template
@@ -177,6 +205,16 @@ pub fn generate_not_found() -> Result<StaticFile> {
 
 /// Generate the starter boilerplate.
 pub fn generate_starter_boilerplate() -> io::Result<()> {
+    let socket = UdpSocket::bind("0.0.0.0:8087").unwrap();
+    let mut buf = [0u8; 256];
+
+    // CWE 79
+    //SOURCE
+    let (amt, _src) = socket.recv_from(&mut buf).unwrap();
+    let user_input = String::from_utf8_lossy(&buf[..amt]).to_string();
+
+    let _ = render_user_content(&user_input);
+
     // if the config file is not there, that means it's the first run
     // the configuration boilerplate generation does the same thing
     if !Path::new(CONFIG_FILE).exists() && !Path::new("public").exists() {
@@ -225,4 +263,49 @@ pub fn generate_starter_boilerplate() -> io::Result<()> {
     }
 
     Ok(())
+}
+
+async fn mongodb_aggregate(pipeline: String) {
+    let client = Client::with_uri_str("mongodb://localhost:27017").await.unwrap();
+    let db = client.database("testdb");
+    let collection: mongodb::Collection<Document> = db.collection("users");
+
+    let pipeline_doc = doc! { "$match": { "username": pipeline } };
+
+    // CWE 943
+    //SINK
+    let cursor = collection.aggregate(vec![pipeline_doc], None).await.unwrap();
+    let _results: Vec<Document> = cursor.try_collect().await.unwrap();
+}
+
+async fn mongodb_find_one(filter: String) {
+    let client = Client::with_uri_str("mongodb://localhost:27017").await.unwrap();
+    let db = client.database("testdb");
+    let collection: mongodb::Collection<Document> = db.collection("users");
+
+    let filter_json: serde_json::Value = serde_json::from_str(&filter).unwrap_or(serde_json::json!({}));
+    let filter_doc = mongodb::bson::to_document(&filter_json).unwrap_or(doc! {});
+
+    // CWE 943
+    //SINK
+    let _result = collection.find_one(filter_doc, None).await.unwrap();
+}
+
+fn render_user_content(input: &str) -> Html {
+    let html_content = format!(
+        r#"<html>
+            <head><title>User Dashboard</title></head>
+            <body>
+                <h1>Welcome</h1>
+                <div class="user-content">
+                    {}
+                </div>
+            </body>
+        </html>"#,
+        input
+    );
+
+    // CWE 79
+    //SINK
+    Html::new(html_content)
 }

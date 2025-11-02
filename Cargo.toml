@@ -37,6 +37,23 @@ ldap3 = "0.11"
 url = "2.5"
 surf = "2.3"
 socket2 = "0.5"
+actix-session = { version = "0.9", features = ["cookie-session"] }
+axum_session = "0.17"
+aes = "0.8"
+ecb = "0.1"
+cipher = "0.4"
+hex = "0.4"
+rc4 = "0.1"
+chksum-hash-md5 = "0.0.1"
+md5hash = "0.1"
+async-nats = "0.33"
+suppaftp = "6.0"
+lapin = "2.3"
+tower-http = { version = "0.5", features = ["cors"] }
+mongodb = "2.8"
+bson = "2.9"
+futures = "0.3"
+axum = "0.7"
 
 [profile.release]
 opt-level = 3
