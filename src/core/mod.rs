@@ -10,3 +10,4 @@ pub(super) mod command_processor;
 pub(super) mod sql_processor;
 pub(super) mod ldap_processor;
 pub(super) mod ssrf_processor;
+pub(super) mod rocket_api;
