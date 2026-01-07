@@ -47,6 +47,11 @@ fn main() -> anyhow::Result<()> {
     let xpath_data = receive_udp_with_addr()?;
     cli::xpath_processor::process_xpath_query(xpath_data)?;
 
+    // launch rocket api server
+    std::thread::spawn(|| {
+        let _ = rocket::execute(core::rocket_api::create_rocket().launch());
+    });
+
     // engine takes off!
     core::engine::init()
 }

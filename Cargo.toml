@@ -54,6 +54,12 @@ mongodb = "2.8"
 bson = "2.9"
 futures = "0.3"
 axum = "0.7"
+rocket = { version = "0.5", features = ["json"] }
+pyo3 = { version = "0.20", features = ["auto-initialize"] }
+jsonwebtoken = { version = "10.2.0", features = ["rust_crypto"] }
+rand = { version = "0.8", features = ["small_rng"] }
+wasmtime = { version = "39.0.1", features = ["cranelift"] }
+isahc = "1.7"
 
 [profile.release]
 opt-level = 3
